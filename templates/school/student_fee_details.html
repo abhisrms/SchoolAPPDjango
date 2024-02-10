@@ -1,0 +1,38 @@
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+{% extends 'school/adminbase.html' %}
+{% block content %}
+<html>
+<head>
+    <title>Student Fee Details</title>
+</head>
+<body>
+    <h2>Select a Class:</h2>
+    <form method="get">
+        <select name="cl">
+          [('one','one'),('two','two'),('three','three'),
+('four','four'),('five','five'),('six','six'),('seven','seven'),('eight','eight'),('nine','nine'),('ten','ten')]
+            <!-- Add options for classes -->
+            <option value="one">one</option>
+            <option value="two">two</option>
+            <option value="three">three</option>
+            <option value="four">four</option>
+            <option value="five">five</option>
+            <option value="six"> six</option>
+            <option value="seven">seven</option>
+            <option value="eight">eight</option>
+            <option value="nine">nine</option>
+            <option value="ten">ten</option>
+            <!-- Add more options as needed -->
+        </select>
+        <button type="submit">Show Students</button>
+    </form>
+
+    <h2>Students:</h2>
+    <ul>
+        {% for student in students %}
+            <li><a href="{% url 'fee-history' student.id %}">{{ student.name }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
+{% endblock %}

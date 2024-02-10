@@ -1,0 +1,70 @@
+{% extends 'school/adminbase.html' %}
+{% block content %}
+<head>
+    <title>Fee History</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        .center {
+            text-align: center;
+        }
+        .left {
+            text-align: left
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    {% for message in messages %}
+    <div class="alert alert-success" role="alert">
+      {{ message }}
+    </div>
+  {% endfor %}
+    <h2>Fee History for {{ student.get_name }} - Class: {{ student.cl }}</h2>
+    <table>
+        <tr>
+            <th>Total Fees</th>
+            <th>Fees Paid</th>
+            <th>Remaining Fee</th>
+            <th>Payment Date</th>
+            <th>Collected By</th>
+        </tr>
+        {% for payment in payments %}
+            <tr>
+                <td>{{ payment.student.fee }}</td>
+                <td>{{ payment.amount_received }}</td>
+                <td>{{ payment.remaining_fee}}</td>
+                <td>{{ payment.date_received }}</td>
+                <td>{{ payment.collected_by.get_name }}</td>
+            </tr>
+            
+        {% endfor %}
+    </table>
+    <br></br>
+    <div class="container">
+        <div class="left">
+            <a href="{% url 'add-payment' student.id %}">Add Payment</a>
+        </div>
+        <div class="right">
+            <a href="{% url 'student-fee-details' %}">Back to Collect Fees</a>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}
+ 

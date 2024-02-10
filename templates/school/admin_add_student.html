@@ -1,0 +1,136 @@
+{% extends 'school/adminbase.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<head>
+  <style media="screen">
+    a:link {
+      text-decoration: none;
+    }
+
+    .note {
+      text-align: center;
+      height: 80px;
+       background: -webkit-linear-gradient(left, #343a40, #607d8b);
+      color: #fff;
+      font-weight: bold;
+      line-height: 80px;
+    }
+
+    .form-content {
+      padding: 5%;
+      border: 1px solid #ced4da;
+      margin-bottom: 2%;
+    }
+
+    .form-control {
+      border-radius: 1.5rem;
+    }
+
+    .btnSubmit {
+      border: none;
+      border-radius: 1.5rem;
+      padding: 1%;
+      width: 20%;
+      cursor: pointer;
+      background: #4caf50;
+      color: #fff;
+    }
+  </style>
+
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  
+
+</head>
+
+<!--
+written By : sumit kumar
+-->
+
+<!------ signup page for student by admin(sumit)  ---------->
+<form method="post">
+  {% csrf_token %}
+  <div class="container register-form">
+    <div class="form">
+      <div class="note">
+        <p>New Admission of Student In School</p>
+      </div>
+
+      <div class="form-content">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              {% render_field form1.first_name class="form-control" placeholder="First Name" %}
+            </div>
+            <div class="form-group">
+              {% render_field form1.username class="form-control" placeholder="Username" %}
+            </div>
+            <div class="form-group">
+              {% render_field form2.mobile class="form-control" placeholder="Contact" %}
+            </div>
+            <div class="form-group">
+              <label for="id_cl">Class:</label>
+              <select name="cl" id="id_cl" onchange="updateFee()">
+                {% for cl_choice in form2.cl.field.choices %}
+                    <option value="{{ cl_choice.0 }}">{{ cl_choice.1 }}</option>
+                {% endfor %}
+            </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              {% render_field form1.last_name class="form-control" placeholder="Last Name" %}
+            </div>
+            <div class="form-group">
+              {% render_field form1.password class="form-control" type="password" placeholder="Password" %}
+            </div>
+            <div class="form-group">
+              <label for="id_fee">Fees:</label>
+              <input type="number" name="fee" min="0" required id="id_fee" readonly>
+                 </div>
+            <div class="form-group">
+              {% render_field form2.roll class="form-control" placeholder="Roll" %}
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btnSubmit">Submit</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Fetch the default fee from the visible field
+    var defaultFee = document.getElementById('id_fee').value;
+    console.log(id_cl,id_fee)
+    
+
+    // Update fee based on the selected class
+    window.updateFee = function () {
+        var selectedClass = document.getElementById('id_cl').value;
+        var feeField = document.getElementById('id_fee');
+
+        // Fetch the fee from the server based on the selected class
+        fetch('/get-fee/' + selectedClass)
+            .then(response => response.json())
+            .then(data => {
+                feeField.value = data.fee;
+            })
+            .catch(error => {
+                console.error('Error fetching fee:', error);
+                feeField.value = defaultFee;
+            });
+    };
+
+    // Initial update based on the default class
+    window.updateFee();
+});
+</script>
+
+
+{% endblock content %}

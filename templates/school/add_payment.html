@@ -1,0 +1,82 @@
+{% extends 'school/adminbase.html' %}
+{% block content %}
+<html>
+    <head>
+        <title>Add Payment</title>
+        <style>
+            /* General styling for buttons */
+            .button {
+                padding: 12px 20px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                width: 100%;
+            }
+            .button:hover {
+                opacity: 0.8;
+            }
+            /* Styling for the submit button */
+            #submit-button {
+                background-color: #4CAF50;
+                color: white;
+            }
+            #submit-button:hover {
+                background-color: #45a049;
+            }
+            /* Container styles */
+            .container {
+                display: flex;
+                justify-content: space-between;
+            }
+            .left-box, .right-box {
+                width: 45%;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            /* Additional styles for form elements */
+            label {
+                display: inline-block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+            input[type="number"], input[type="date"], select {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h2>Add Payment for {{ student.get_name }} - Class: {{ student.cl }}:</h2>
+        <div class="container">
+            <div class="left-box">
+                <form method="post">
+                    {% csrf_token %}
+                    <!-- Use Django form rendering for better consistency -->
+                    <label for="fees_received">Fees received:</label>
+                    {{ form.fees_received }}
+                    <br><br>
+                    <label for="date">Date:</label>
+                    {{ form.date }}
+                    <br><br>
+                    <label for="collected_by">Collected By:</label>
+                    {{ form.collected_by }}
+                    <br><br>
+                    <button id="submit-button" class="button" type="submit">Submit Payment</button>
+                </form>
+            </div>
+            <div class="right-box">
+                <p><strong>Total Fee:</strong> {{ total_fee }}</p>
+                <p><strong>Total Fee Paid:</strong> {{ total_fee_paid }}</p>
+                <p><strong>Remaining Fee:</strong> {{ remaining_fee }}</p>
+            </div>
+        </div>
+    </body>
+</html>
+{% endblock %}

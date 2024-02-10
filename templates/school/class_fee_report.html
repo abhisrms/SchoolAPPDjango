@@ -1,0 +1,85 @@
+{% extends 'school/adminbase.html' %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+  
+    <style media="screen">
+        .center {
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<script>
+    // Function to redirect to fee history page when clicking on class name
+    function showFeeHistory(classId) {
+        var urlParams = new URLSearchParams(window.location.search);
+        var selectedDate = urlParams.get('selectedDate');
+        window.location.href = `/class-fee-history/${classId}/?selectedDate=${selectedDate}`;
+    }
+
+</script>
+<body>
+
+
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Total Students</th>
+                    <th>Class Fee</th>
+                    <th>Total Fee</th>
+                    <th>Fees Paid</th>
+                    <th>Remaining Fee</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in class_reports %}
+                <tr>
+                    <td><a href="javascript:void(0)" onclick="showFeeHistory('{{ report.class }}')">{{ report.class }}</a></td>
+                    <td>{{ report.total_students }}</td>
+                    <td>{{ report.total_fee_per_student }}</td>
+                    <td>{{ report.total_fee }}</td>
+                    <td>{{ report.total_fee_paid }}</td>
+                    <td>{{ report.remaining_fee }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="center">
+            <a href="{% url 'admin-class-fee-select' %}">Back to Select date  Page</a>
+             
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
+{% endblock %}

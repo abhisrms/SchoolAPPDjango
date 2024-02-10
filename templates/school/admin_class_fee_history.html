@@ -1,0 +1,157 @@
+{% extends 'school/adminbase.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+    <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Class Fee History</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                }
+        
+                h1 {
+                    text-align: center;
+                    margin-top: 20px;
+                    margin-bottom: 20px;
+                }
+                .center {
+                    text-align: center;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    border-radius: 10px;
+                    overflow: hidden;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                    background-color: #fff;
+                }
+        
+                th, td {
+                    padding: 12px 15px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                }
+        
+                th {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
+        
+                td {
+                    font-size: 14px;
+                }
+        
+                tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+        
+                tr:hover {
+                    background-color: #f2f2f2;
+                }
+        
+                @media screen and (max-width: 600px) {
+                    table {
+                        border-radius: 0;
+                        box-shadow: none;
+                    }
+        
+                    th, td {
+                        padding: 8px;
+                    }
+                }
+                /* Animation for no data found */
+                @keyframes noDataAnimation {
+                    0% { transform: translateY(0); }
+                    50% { transform: translateY(-5px); }
+                    100% { transform: translateY(0); }
+                }
+            
+                .no-data-animation {
+                    animation: noDataAnimation 1s infinite;
+                    align:center
+                }
+                .no-data-message {
+                    font-style: italic;
+                    color: #999;
+                    align :center
+                }
+            </style>
+            
+        </head>
+        <body>
+            <h1>Class Fee History for {{ class_id }}</h1>
+        
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Total Fees</th>
+                        <th>Fees Paid</th>
+                        <th>Remaining Fee</th>
+                        <th>Payment Date</th>
+                        <th>Collected By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if payments %}
+                    {% for payment in payments %}
+                        {% for student in students %}
+                            {% if payment.student == student %}
+                                <tr>
+                                <td>{{ student.get_name }}</td>
+                                <td>${{ student.fee }}</td>
+                        <!-- Calculate total fees paid and remaining fee for each student -->    
+                        <!-- If you have payment history for each student, you can display it here -->
+                        <!-- Loop through payments for each student and display them -->
+                        {% comment %} {% for payment in payments %}
+                            {% if payment.student == student %} {% endcomment %}
+                                <td>{{ payment.amount_received |default:"NA"}}</td>
+                                <td>{{ payment.remaining_fee|default:"NA"}}</td>
+                                <td>{{ payment.date_received|default:"NA" }}</td>
+                                <td>{{ payment.collected_by.get_name|default:"NA" }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="no-data-message" style="text-align: center;">
+                            <!-- Include the GIF image here -->
+                            <img src="{% static 'images/No_data.gif' %}" alt="No data found" style="display: block; margin: 0 auto;">
+                            <p style="font-weight: bold; color: black;">No data found.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+            <script>
+                function applyNoDataAnimation() {
+                    var table = document.querySelector('table');
+                    if (table.rows.length <= 1) {
+                        table.classList.add('no-data-animation');
+                    } else {
+                        table.classList.remove('no-data-animation');
+                    }
+                }
+        
+                // Call the function after the table has been rendered
+                applyNoDataAnimation();
+                function goBack() {
+                    window.history.back();
+                }
+            </script>
+            
+            <div class="center">
+                <a href="{% url 'admin-class-fee-select' %}">Back to Select date  Page</a>
+                <a href="javascript:void(0);" onclick="goBack()">Go Back</a>
+                
+            </div>
+        </body>
+        </html>
+{% endblock %}
+
