@@ -52,19 +52,23 @@
                 <td>{{ payment.date_received }}</td>
                 <td>{{ payment.collected_by.get_name }}</td>
             </tr>
-            
-        {% endfor %}
+            {% endfor %} 
+        
     </table>
     <br></br>
     <div class="container">
         <div class="left">
-            <a href="{% url 'add-payment' student.id %}">Add Payment</a>
+            {% if remaining_fee_found %}
+                <span style="color: gray; cursor: not-allowed;">No Fee Remaining</span>
+            {% else %}
+                <a href="{% url 'add-payment' student.id %}">Add Payment</a>
+            {% endif %}
         </div>
         <div class="right">
             <a href="{% url 'student-fee-details' %}">Back to Collect Fees</a>
         </div>
     </div>
-</body>
-</html>
-{% endblock %}
+    </body>
+    </html>
+    {% endblock %}
  
