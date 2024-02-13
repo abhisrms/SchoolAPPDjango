@@ -78,25 +78,27 @@
                 <p><strong>Remaining Fee:</strong> {{ remaining_fee }}</p>
             </div>
         </div>
+        <script>
+           document.addEventListener('DOMContentLoaded', function () {
+       
+                // Real-time validation
+                var feesReceivedInput = document.getElementById('id_fees_received');
+                var feesError = document.getElementById('fees-error');
+        
+                feesReceivedInput.addEventListener('input', function () {
+                    var feesReceived = parseFloat(this.value);
+                    var remainingFee = parseFloat('{{ remaining_fee }}');
+                    if (feesReceived > remainingFee) {
+                        feesError.textContent = 'Entered amount cannot be greater than remaining fee.';
+                        document.getElementById('submit-button').disabled = true;
+                    } else {
+                        feesError.textContent = '';
+                        document.getElementById('submit-button').disabled = false;
+                    }
+                });
+            }); 
+        </script>
     </body>
-  <!-- JavaScript for real-time validation -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var feesReceivedInput = document.getElementById('id_fees_received');
-        var feesError = document.getElementById('fees-error');
 
-        feesReceivedInput.addEventListener('input', function () {
-            var feesReceived = parseFloat(this.value);
-            var remainingFee = parseFloat('{{ remaining_fee }}');
-            if (feesReceived > remainingFee) {
-                feesError.textContent = 'Entered amount cannot be greater than remaining fee.';
-                document.getElementById('submit-button').disabled = true;
-            } else {
-                feesError.textContent = '';
-                document.getElementById('submit-button').disabled = false;
-            }
-        });
-    });
-</script>
 </html>
 {% endblock %}
