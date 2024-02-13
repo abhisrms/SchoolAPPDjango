@@ -43,6 +43,7 @@
             <th>Remaining Fee</th>
             <th>Payment Date</th>
             <th>Collected By</th>
+            {% comment %} <th>Carryover Balance</th> {% endcomment %}
         </tr>
         {% for payment in payments %}
             <tr>
@@ -51,6 +52,7 @@
                 <td>{{ payment.remaining_fee}}</td>
                 <td>{{ payment.date_received }}</td>
                 <td>{{ payment.collected_by.get_name }}</td>
+                {% comment %} <td>{{ carryover_balance }}</td> {% endcomment %}
             </tr>
             {% endfor %} 
         
@@ -68,6 +70,7 @@
             <a href="{% url 'student-fee-details' %}">Back to Collect Fees</a>
         </div>
     </div>
+    {% comment %} <p><strong>Carryover Balance:</strong> {{ carryover_balance }}</p> {% endcomment %}
     </body>
     </html>
     {% endblock %}
