@@ -61,6 +61,7 @@
                     <!-- Use Django form rendering for better consistency -->
                     <label for="fees_received">Fees received:</label>
                     {{ form.fees_received }}
+                    <span id="fees-error" style="color: red;"></span> <!-- Error message placeholder -->
                     <br><br>
                     <label for="date">Date:</label>
                     {{ form.date }}
@@ -77,6 +78,27 @@
                 <p><strong>Remaining Fee:</strong> {{ remaining_fee }}</p>
             </div>
         </div>
+        <script>
+           document.addEventListener('DOMContentLoaded', function () {
+       
+                // Real-time validation
+                var feesReceivedInput = document.getElementById('id_fees_received');
+                var feesError = document.getElementById('fees-error');
+        
+                feesReceivedInput.addEventListener('input', function () {
+                    var feesReceived = parseFloat(this.value);
+                    var remainingFee = parseFloat('{{ remaining_fee }}');
+                    if (feesReceived > remainingFee) {
+                        feesError.textContent = 'Entered amount cannot be greater than remaining fee.';
+                        document.getElementById('submit-button').disabled = true;
+                    } else {
+                        feesError.textContent = '';
+                        document.getElementById('submit-button').disabled = false;
+                    }
+                });
+            }); 
+        </script>
     </body>
+
 </html>
 {% endblock %}

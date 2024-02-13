@@ -8,14 +8,15 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.contrib.auth.views import LogoutView
-from django.views.decorators.http import require_GET
 from .models import Fee,StudentExtra,Payment
 from django.http import JsonResponse
 from .forms import FeeUpdateForm  ,PaymentForm 
 from school.models import Fee , Payment ,StudentExtra,TeacherExtra
 from django.contrib import messages
 from datetime import datetime, timedelta
+from django.utils import timezone
 import logging
+import calendar
 
 def home_view(request):
     if request.user.is_authenticated:
@@ -717,9 +718,15 @@ def student_fee_details(request):
 
 def fee_history(request, student_id):
     student = get_object_or_404(StudentExtra, user_id=student_id)
-    payments = Payment.objects.filter(student=student)
-    return render(request, 'school/fee_history.html', {'student': student, 'payments': payments})
+    payments = Payment.objects.filter(student=student).order_by('date_received')
+    remaining_fee_found = False
+    if payments:
+        last_payment = payments.last()
+        remaining_fee = last_payment.remaining_fee
+        if remaining_fee == 0:
+            remaining_fee_found = True
 
+    return render(request, 'school/fee_history.html', {'student': student, 'payments': payments, 'remaining_fee_found': remaining_fee_found})
 
 
 def add_payment(request, student_id):
@@ -730,25 +737,35 @@ def add_payment(request, student_id):
     total_fee_paid = total_fee_paid if total_fee_paid is not None else 0
     remaining_fee = total_fee - total_fee_paid
 
+    current_date = datetime.now()
+    current_year = current_date.year
+    current_month = current_date.month
+    first_day_of_month = current_date.replace(day=1)
+    last_day_of_month = first_day_of_month + timedelta(days=calendar.monthrange(current_year, current_month)[1] - 1)
+
+
     if request.method == 'POST':
-        form = PaymentForm(request.POST)
+        form = PaymentForm(request.POST, first_day_of_month=first_day_of_month, last_day_of_month=last_day_of_month)
         if form.is_valid():
             # Process the payment submission logic here
             amount_received = form.cleaned_data['fees_received']
             date_received = form.cleaned_data['date']
             collected_by = form.cleaned_data['collected_by']
-            remaining_fee = remaining_fee - amount_received
-
+            if amount_received > remaining_fee:
+                messages.error(request, 'Entered amount cannot be greater than remaining fee.')
+            else:
+                remaining_fee -= amount_received
             # Save the payment information
-            Payment.objects.create(student=student, amount_received=amount_received, date_received=date_received, collected_by=collected_by ,remaining_fee=remaining_fee)
-
-            messages.success(request, 'Payment added successfully.')  # Add a success message
-            return redirect('fee-history', student_id=student.get_id)  # Redirect to fee history page for the same student
+                Payment.objects.create(student=student, amount_received=amount_received, date_received=date_received, collected_by=collected_by ,remaining_fee=remaining_fee)
+                messages.success(request, 'Payment added successfully.')  # Add a success message
+                return redirect('fee-history', student_id=student.get_id)  # Redirect to fee history page for the same student
         else:
             messages.error(request, 'Invalid form submission. Please correct the errors.')
 
     else:
-        form = PaymentForm()
+        initial_date = first_day_of_month.strftime('%Y-%m-%d')
+        form = PaymentForm(initial={'date': initial_date}, first_day_of_month=first_day_of_month, last_day_of_month=last_day_of_month)
+
 
     return render(
         request,
@@ -759,6 +776,10 @@ def add_payment(request, student_id):
             'total_fee_paid': total_fee_paid,
             'remaining_fee': remaining_fee,
             'form': form,
+            'current_year': current_year,
+            'current_month': current_month,
+            'first_day_of_month': first_day_of_month.strftime('%Y-%m-%d'),
+            'last_day_of_month': last_day_of_month.strftime('%Y-%m-%d'),
         },
     )
 
@@ -825,3 +846,4 @@ def class_fee_history_view(request, class_id):
     }
 
     return render(request, 'school/admin_class_fee_history.html', context)
+
