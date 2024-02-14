@@ -106,14 +106,15 @@ class PaymentForm(forms.Form):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label='Date')
     collected_by = forms.ModelChoiceField(queryset=TeacherExtra.objects.all(), to_field_name='user_id', label='Collected By')
 
-    def __init__(self, *args, **kwargs):
-        first_day_of_month = kwargs.pop('first_day_of_month', None)
-        last_day_of_month = kwargs.pop('last_day_of_month', None)
-        initial_date = kwargs.pop('initial_date', None)
-        super(PaymentForm, self).__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     first_day_of_month = kwargs.pop('first_day_of_month', None)
+    #     last_day_of_month = kwargs.pop('last_day_of_month', None)
+    #     initial_date = kwargs.pop('initial_date', None)
+    #     super(PaymentForm, self).__init__(*args, **kwargs)
         
-        if first_day_of_month and last_day_of_month:
-            self.fields['date'].widget.attrs['min'] = first_day_of_month.strftime('%Y-%m-%d')
-            self.fields['date'].widget.attrs['max'] = last_day_of_month.strftime('%Y-%m-%d')
-        if initial_date:
-            self.fields['date'].widget.attrs['value'] = initial_date.strftime('%Y-%m-%d')
+    #     if first_day_of_month and last_day_of_month:
+    #         self.fields['date'].widget.attrs['min'] = first_day_of_month.strftime('%Y-%m-%d')
+    #         self.fields['date'].widget.attrs['max'] = last_day_of_month.strftime('%Y-%m-%d')
+    #     if initial_date:
+    #         self.fields['date'].widget.attrs['value'] = initial_date.strftime('%Y-%m-%d')
+

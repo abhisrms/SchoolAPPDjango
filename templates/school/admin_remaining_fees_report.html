@@ -1,0 +1,33 @@
+{% extends 'school/adminbase.html' %}
+{% block content %}
+<html>
+
+<body>
+
+    <div class="container">
+        <h2>Students with remaining fees for :</h2>
+
+        <div class="left-box">
+            <form method="post">
+                {% csrf_token %}
+                <label for="id_date">Date:</label>
+                {{ form.date }}
+        
+                <button type="submit">Generate Report</button>
+            </form>
+            
+            {% if students_with_remaining_fees %}
+
+                <ul>
+                {% for student in students_with_remaining_fees %}
+                    <li>{{ student.student_name }} - Remaining Fees: {{ student.remaining_fee }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+
+</body>
+
+</html>
+    {% endblock %}

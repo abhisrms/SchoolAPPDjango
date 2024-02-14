@@ -38,10 +38,13 @@
 </script>
 </script>
 <body>
-
+    
 <div class="content">
     <div class="container">
+        <br></br>
+        <h2>Fees report of All classes :</h2>
         <!-- Date input field and submit button -->
+        <br></br>
         <div class="form-group">
             <label for="selectedDate" ><b>Select Date:</b></label>
             <input type="date" id="selectedDate" >
@@ -50,7 +53,9 @@
         </div>
          <button onclick="submitDate()" class="btn btn-primary">Submit</button>
 
-
+         <div class="right">
+            {% comment %} <a href="{% url 'admin-remaining-fees-report' %}">Back to Collect Fees</a> {% endcomment %}
+        </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
