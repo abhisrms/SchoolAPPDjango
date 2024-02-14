@@ -70,25 +70,30 @@
                     {{ form.collected_by }}
                     <br><br>
                     <button id="submit-button" class="button" type="submit">Submit Payment</button>
+                    
                 </form>
             </div>
             <div class="right-box">
-                <p><strong>Total Fee:</strong> {{ total_fee }}</p>
-                <p><strong>Total Fee Paid:</strong> {{ total_fee_paid }}</p>
-                <p><strong>Remaining Fee:</strong> {{ remaining_fee }}</p>
+                <p><strong>Total Fee:</strong> <span id="total-fee">{{ total_fee }}</span></p>
+                <p><strong>Total Fee Paid:</strong> <span id="total-fee-paid">{{ total_fee_paid }}</span></p>
+                <p><strong>Remaining Fee:</strong> <span id="remaining-fee">{{ remaining_fee }}</span></p>
+              </div>
+        </div>
+        <div class="container">
+            <div class="left"> <!-- Use class "left" instead of "left-box" -->
+                <a href="{% url 'fee-history' student.id %}">Fee History</a> <!-- Provide the link text -->
             </div>
         </div>
         <script>
-           document.addEventListener('DOMContentLoaded', function () {
-       
+            document.addEventListener('DOMContentLoaded', function () {
                 // Real-time validation
                 var feesReceivedInput = document.getElementById('id_fees_received');
                 var feesError = document.getElementById('fees-error');
+                var remainingFee; // Declare a variable in a broader scope
         
                 feesReceivedInput.addEventListener('input', function () {
                     var feesReceived = parseFloat(this.value);
-                    var remainingFee = parseFloat('{{ remaining_fee }}');
-                    if (feesReceived > remainingFee) {
+                    if (feesReceived > remainingFee) { // Access the remainingFee variable
                         feesError.textContent = 'Entered amount cannot be greater than remaining fee.';
                         document.getElementById('submit-button').disabled = true;
                     } else {
@@ -96,8 +101,31 @@
                         document.getElementById('submit-button').disabled = false;
                     }
                 });
+        
+                var dateInput = document.getElementById('id_date');
+                dateInput.addEventListener('change', function () {
+                    var selectedDate = this.value;
+        
+                    // Send AJAX request to update the fee details
+                    $.ajax({
+                        url: '/update-fees/{{ student.id }}/',  // Assuming student.id is available in the template
+                        method: 'GET',
+                        data: {'selected_date': selectedDate},
+                        success: function(response) {
+                            // Assign response.remaining_fee to the variable in broader scope
+                            remainingFee = parseFloat(response.remaining_fee);
+                            $('#total-fee').text(response.total_fee);
+                            $('#total-fee-paid').text(response.total_fee_paid);
+                            $('#remaining-fee').text(response.remaining_fee);
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                });
             }); 
         </script>
+    
     </body>
 
 </html>

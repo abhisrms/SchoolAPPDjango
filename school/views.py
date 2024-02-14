@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,reverse,get_object_or_404
 from . import forms,models
-from django.db.models import Sum
+
 from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required,user_passes_test
@@ -11,12 +11,14 @@ from django.contrib.auth.views import LogoutView
 from .models import Fee,StudentExtra,Payment
 from django.http import JsonResponse
 from .forms import FeeUpdateForm  ,PaymentForm 
-from school.models import Fee , Payment ,StudentExtra,TeacherExtra
+from school.models import Fee , Payment ,StudentExtra
 from django.contrib import messages
 from datetime import datetime, timedelta
-from django.utils import timezone
+
 import logging
-import calendar
+
+from django.db.models import Count
+from django.db.models import Sum
 
 def home_view(request):
     if request.user.is_authenticated:
@@ -731,40 +733,40 @@ def fee_history(request, student_id):
 
 def add_payment(request, student_id):
     student = get_object_or_404(StudentExtra, id=student_id)
-    total_fee = student.fee
-    total_fee_paid = Payment.objects.filter(student=student).aggregate(total=Sum('amount_received'))['total']
-     # Check if total_fee_paid is None and set it to 0
-    total_fee_paid = total_fee_paid if total_fee_paid is not None else 0
-    remaining_fee = total_fee - total_fee_paid
-
-    current_date = datetime.now()
-    current_year = current_date.year
-    current_month = current_date.month
-    first_day_of_month = current_date.replace(day=1)
-    last_day_of_month = first_day_of_month + timedelta(days=calendar.monthrange(current_year, current_month)[1] - 1)
-
 
     if request.method == 'POST':
-        form = PaymentForm(request.POST, first_day_of_month=first_day_of_month, last_day_of_month=last_day_of_month)
+        form = PaymentForm(request.POST)
         if form.is_valid():
-            # Process the payment submission logic here
+            current_date = form.cleaned_data['date']
+            current_year = current_date.year
+            current_month = current_date.month
+            
+            # Calculate the total fee for the selected month
+            total_fee = student.fee
+            
+            # Calculate the total fee paid by the student for the selected month
+            total_fee_paid = Payment.objects.filter(student=student, date_received__year=current_year, date_received__month=current_month).aggregate(total=Sum('amount_received'))['total']
+            total_fee_paid = total_fee_paid if total_fee_paid is not None else 0
+            
+            # Calculate the remaining fee for the selected month
+            remaining_fee = total_fee - total_fee_paid
+
             amount_received = form.cleaned_data['fees_received']
-            date_received = form.cleaned_data['date']
             collected_by = form.cleaned_data['collected_by']
             if amount_received > remaining_fee:
                 messages.error(request, 'Entered amount cannot be greater than remaining fee.')
             else:
                 remaining_fee -= amount_received
-            # Save the payment information
-                Payment.objects.create(student=student, amount_received=amount_received, date_received=date_received, collected_by=collected_by ,remaining_fee=remaining_fee)
-                messages.success(request, 'Payment added successfully.')  # Add a success message
-                return redirect('fee-history', student_id=student.get_id)  # Redirect to fee history page for the same student
+                Payment.objects.create(student=student, amount_received=amount_received, date_received=current_date, collected_by=collected_by, remaining_fee=remaining_fee)
+                messages.success(request, 'Payment added successfully.')
+                return redirect('fee-history', student_id=student.get_id)
         else:
             messages.error(request, 'Invalid form submission. Please correct the errors.')
 
     else:
-        initial_date = first_day_of_month.strftime('%Y-%m-%d')
-        form = PaymentForm(initial={'date': initial_date}, first_day_of_month=first_day_of_month, last_day_of_month=last_day_of_month)
+        # initial_date = first_day_of_month.strftime('%Y-%m-%d')
+        # form = PaymentForm(initial={'date': initial_date}, first_day_of_month=first_day_of_month, last_day_of_month=last_day_of_month)
+        form =PaymentForm()
 
 
     return render(
@@ -772,16 +774,42 @@ def add_payment(request, student_id):
         'school/add_payment.html',
         {
             'student': student,
-            'total_fee': total_fee,
-            'total_fee_paid': total_fee_paid,
-            'remaining_fee': remaining_fee,
+            # 'total_fee': total_fee,
+            # 'total_fee_paid': total_fee_paid,
+            # 'remaining_fee': remaining_fee,
             'form': form,
-            'current_year': current_year,
-            'current_month': current_month,
-            'first_day_of_month': first_day_of_month.strftime('%Y-%m-%d'),
-            'last_day_of_month': last_day_of_month.strftime('%Y-%m-%d'),
+            # 'current_year': current_year,
+            # 'current_month': current_month,
+            # 'first_day_of_month': first_day_of_month.strftime('%Y-%m-%d'),
+            # 'last_day_of_month': last_day_of_month.strftime('%Y-%m-%d'),
         },
     )
+
+
+
+def update_fees(request, student_id):
+    student = get_object_or_404(StudentExtra, id=student_id)
+    current_date_str = request.GET.get('selected_date')  # Extract the selected date from the request
+    current_date = datetime.strptime(current_date_str, '%Y-%m-%d')  # Parse the string into a datetime object
+
+    current_year = current_date.year
+    current_month = current_date.month
+            
+    # Calculate the total fee for the selected month
+    total_fee = student.fee
+            
+    # Calculate the total fee paid by the student for the selected month
+    total_fee_paid = Payment.objects.filter(student=student, date_received__year=current_year, date_received__month=current_month).aggregate(total=Sum('amount_received'))['total']
+    total_fee_paid = total_fee_paid if total_fee_paid is not None else 0
+            
+    # Calculate the remaining fee for the selected month
+    remaining_fee = total_fee - total_fee_paid
+    
+    return JsonResponse({
+        'total_fee': total_fee,
+        'total_fee_paid': total_fee_paid,
+        'remaining_fee': remaining_fee,
+    })
 
 
 def class_fee_select(request):

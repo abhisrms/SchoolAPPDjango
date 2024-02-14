@@ -60,11 +60,11 @@
     <br></br>
     <div class="container">
         <div class="left">
-            {% if remaining_fee_found %}
-                <span style="color: gray; cursor: not-allowed;">No Fee Remaining</span>
-            {% else %}
+            {% comment %} {% if remaining_fee_found %} {% endcomment %}
+                {% comment %} <span style="color: gray; cursor: not-allowed;">No Fee Remaining</span> {% endcomment %}
+            {% comment %} {% else %} {% endcomment %}
                 <a href="{% url 'add-payment' student.id %}">Add Payment</a>
-            {% endif %}
+            {% comment %} {% endif %} {% endcomment %}
         </div>
         <div class="right">
             <a href="{% url 'student-fee-details' %}">Back to Collect Fees</a>

@@ -67,7 +67,8 @@ urlpatterns = [
     path('admin-class-fee-select/', class_fee_select, name='admin-class-fee-select'),
     #  path('class-fee-report-date/<str:date>/', class_fee_report, name='class-fee-report-date'),
     path('class-fee-history/<str:class_id>/', views.class_fee_history_view, name='class_fee_history'),
-
+    # path('admin-remaining-fees-report/', remaining_fees_report, name='admin-remaining-fees-report'),
+    path('update-fees/<int:student_id>/', update_fees, name='update_fees'),
     path('admin-fee', views.admin_fee_view,name='admin-fee'),
     path('admin-view-fee/<str:cl>', views.admin_view_fee_view,name='admin-view-fee'),
 
