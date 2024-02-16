@@ -90,4 +90,6 @@ urlpatterns = [
 
     path('aboutus', views.aboutus_view),
     path('contactus', views.contactus_view),
+    path('download-excel-template/', download_excel_template, name='download_excel_template'),
+    path('admin-bulk-student-upload/', bulk_student_upload, name='admin-bulk-student-upload'),
 ]

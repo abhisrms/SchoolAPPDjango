@@ -79,25 +79,7 @@ class PaymentForm(forms.ModelForm):
         model = Payment
         fields = ['student', 'amount_received', 'date_received', 'collected_by']
 
-# class StudentPaymentForm(forms.Form):
-#     cl = forms.CharField(max_length=10, widget=forms.Select(choices=[('one','one'),('two','two'),('three','three'),
-# ('four','four'),('five','five'),('six','six'),('seven','seven'),('eight','eight'),('nine','nine'),('ten','ten')]))
-#     student = forms.ModelChoiceField(queryset=StudentExtra.objects.all(), to_field_name='user_id', label='Student')
-#     fees_received = forms.DecimalField(min_value=0)
-#     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
-#     collected_by = forms.ModelChoiceField(queryset=TeacherExtra.objects.all(), to_field_name='user_id', label='Collected By')
 
-#     class Meta:
-#         model = Payment
-#         fields = ['cl', 'student', 'fees_received', 'date', 'collected_by']
-
-#     def __init__(self, *args, **kwargs):
-#         super(StudentPaymentForm, self).__init__(*args, **kwargs)
-
-#         # Dynamically load choices for collected_by field
-#         teachers = TeacherExtra.objects.filter(status=True)
-#         teacher_choices = [(teacher.user_id, teacher.get_name) for teacher in teachers]
-#         self.fields['collected_by'].choices = teacher_choices
 
 
 
@@ -106,15 +88,6 @@ class PaymentForm(forms.Form):
     date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label='Date')
     collected_by = forms.ModelChoiceField(queryset=TeacherExtra.objects.all(), to_field_name='user_id', label='Collected By')
 
-    # def __init__(self, *args, **kwargs):
-    #     first_day_of_month = kwargs.pop('first_day_of_month', None)
-    #     last_day_of_month = kwargs.pop('last_day_of_month', None)
-    #     initial_date = kwargs.pop('initial_date', None)
-    #     super(PaymentForm, self).__init__(*args, **kwargs)
-        
-    #     if first_day_of_month and last_day_of_month:
-    #         self.fields['date'].widget.attrs['min'] = first_day_of_month.strftime('%Y-%m-%d')
-    #         self.fields['date'].widget.attrs['max'] = last_day_of_month.strftime('%Y-%m-%d')
-    #     if initial_date:
-    #         self.fields['date'].widget.attrs['value'] = initial_date.strftime('%Y-%m-%d')
+class BulkStudentUploadForm(forms.Form):
+    file = forms.FileField(label='Select Excel file')
 
