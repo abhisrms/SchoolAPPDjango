@@ -1,6 +1,5 @@
 from django.shortcuts import render,redirect,reverse,get_object_or_404
 from . import forms,models
-
 from django.contrib.auth.models import Group
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required,user_passes_test
@@ -10,10 +9,12 @@ from django.http import HttpResponse
 from django.contrib.auth.views import LogoutView
 from .models import Fee,StudentExtra,Payment
 from django.http import JsonResponse
-from .forms import FeeUpdateForm  ,PaymentForm 
-from school.models import Fee , Payment ,StudentExtra
+from .forms import FeeUpdateForm  ,PaymentForm ,BulkStudentUploadForm
+from school.models import Fee , Payment ,StudentExtra ,User
 from django.contrib import messages
 from datetime import datetime, timedelta
+import pandas as pd
+import io
 
 import logging
 
@@ -875,3 +876,91 @@ def class_fee_history_view(request, class_id):
 
     return render(request, 'school/admin_class_fee_history.html', context)
 
+
+
+def download_excel_template(request):
+    # Create a pandas DataFrame with column names matching the StudentExtra model fields
+    template_data = {
+        'First Name': '',
+        'Last Name': '',
+        'Username': '',
+        'Password': '',
+        'Roll': '',
+        'Mobile': '',
+        'Fee': '',
+        'Class': '',
+        'Status': '',
+    }
+    df = pd.DataFrame([template_data])
+
+    # Write DataFrame to an in-memory Excel file
+    excel_file = io.BytesIO()
+    with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False)
+
+    # Set the position of the buffer to the beginning
+    excel_file.seek(0)
+
+    # Create the HTTP response with the Excel file
+    response = HttpResponse(excel_file.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="student_template.xlsx"'
+    return response
+
+def bulk_student_upload(request):
+    if request.method == 'POST':
+        form = BulkStudentUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Read the uploaded Excel file
+            excel_file = request.FILES['file']
+            df = pd.read_excel(excel_file)
+
+            # Initialize a variable to track if all checks passed successfully
+            all_checks_passed = True
+
+            # Iterate through rows and perform checks
+            for index, row in df.iterrows():
+                # Check if the username already exists
+                if User.objects.filter(username=row['Username']).exists():
+                    messages.error(request, f"Username '{row['Username']}' already exists.")
+                    all_checks_passed = False
+                    break  # Exit loop if any check fails
+
+                # Check if mobile and roll number are numbers
+                if not (str(row['Mobile']).isdigit() and str(row['Roll']).isdigit()):
+                    messages.error(request, "Mobile and Roll number should be numbers.")
+                    all_checks_passed = False
+                    break  # Exit loop if any check fails
+
+                # Check if class and name are characters
+                if not (str(row['Class']).isalpha() and str(row['First Name']).isalpha() and str(row['Last Name']).isalpha()):
+                    messages.error(request, "Class, First Name, and Last Name should be characters.")
+                    all_checks_passed = False
+                    break  # Exit loop if any check fails
+
+                # Additional checks can be added here
+
+            if all_checks_passed:
+                # Iterate through rows and create User and StudentExtra instances
+                for index, row in df.iterrows():
+                    user = User.objects.create_user(
+                        username=row['Username'],
+                        password=row['Password'],
+                        first_name=row['First Name'],
+                        last_name=row['Last Name']
+                    )
+                    student_extra = StudentExtra.objects.create(
+                        user=user,
+                        roll=row['Roll'],
+                        mobile=row['Mobile'],
+                        fee=row['Fee'],
+                        cl=row['Class'],
+                        status=row['Status']
+                    )
+                messages.success(request, "Bulk upload successful!")
+            else:
+                messages.error(request, "Failed to upload due to errors. Please fix them and try again.")
+
+            return HttpResponseRedirect(request.path_info)  # Redirect to the same page
+    else:
+        form = BulkStudentUploadForm()
+    return render(request, 'school/admin_bulk_student_upload.html', {'form': form})

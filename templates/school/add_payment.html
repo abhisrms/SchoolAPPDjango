@@ -58,13 +58,13 @@
             <div class="left-box">
                 <form method="post">
                     {% csrf_token %}
+                    <label for="date">Date:</label>
+                    {{ form.date }}
+                    <br><br>
                     <!-- Use Django form rendering for better consistency -->
                     <label for="fees_received">Fees received:</label>
                     {{ form.fees_received }}
                     <span id="fees-error" style="color: red;"></span> <!-- Error message placeholder -->
-                    <br><br>
-                    <label for="date">Date:</label>
-                    {{ form.date }}
                     <br><br>
                     <label for="collected_by">Collected By:</label>
                     {{ form.collected_by }}
