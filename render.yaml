@@ -1,0 +1,4 @@
+services:
+  - name: web
+    buildCommand: docker build -t schoolmanagement .
+    startCommand: docker run -p 8000:8000 schoolmanagement
