@@ -6,10 +6,10 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 # Set the working directory in the container
-WORKDIR /code
+WORKDIR /
 
 # Copy the current directory contents into the container at /code
-COPY . /code/
+COPY . /
 
 # Install dependencies
 RUN pip install --upgrade pip
