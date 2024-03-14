@@ -70,6 +70,7 @@ urlpatterns = [
     # path('admin-remaining-fees-report/', remaining_fees_report, name='admin-remaining-fees-report'),
     path('update-fees/<int:student_id>/', update_fees, name='update_fees'),
     path('admin-fee', views.admin_fee_view,name='admin-fee'),
+    path('teacher-fee', views.teacher_fee_view,name='teacher-fee'),
     path('admin-view-fee/<str:cl>', views.admin_view_fee_view,name='admin-view-fee'),
 
     path('admin-notice', views.admin_notice_view,name='admin-notice'),

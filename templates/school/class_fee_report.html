@@ -66,6 +66,16 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <th>Total:</th>
+                    <th>{{ total_total_students }}</th>
+                    <th></th>
+                    <th>{{ total_total_fee }}</th>
+                    <th>{{ total_total_fee_paid }}</th>
+                    <th>{{ total_remaining_fee }}</th>
+                </tr>
+            </tfoot>
         </table>
         <div class="center">
             <a href="{% url 'admin-class-fee-select' %}">Back to Select date  Page</a>

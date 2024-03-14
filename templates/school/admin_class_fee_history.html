@@ -95,28 +95,29 @@
                         <th>Remaining Fee</th>
                         <th>Payment Date</th>
                         <th>Collected By</th>
+                        <th>Fee Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% if payments %}
-                    {% for payment in payments %}
-                        {% for student in students %}
-                            {% if payment.student == student %}
-                                <tr>
-                                <td>{{ student.get_name }}</td>
-                                <td>${{ student.fee }}</td>
-                        <!-- Calculate total fees paid and remaining fee for each student -->    
-                        <!-- If you have payment history for each student, you can display it here -->
-                        <!-- Loop through payments for each student and display them -->
-                        {% comment %} {% for payment in payments %}
-                            {% if payment.student == student %} {% endcomment %}
-                                <td>{{ payment.amount_received |default:"NA"}}</td>
-                                <td>{{ payment.remaining_fee|default:"NA"}}</td>
-                                <td>{{ payment.date_received|default:"NA" }}</td>
-                                <td>{{ payment.collected_by.get_name|default:"NA" }}</td>
-                            {% endif %}
-                        {% endfor %}
+                    {% for student, payment_details in student_payments.items %}
+                    <tr style="background-color: 
+                        {% if payment_details.fee_status == 'None' %}
+                            #FFCCCC;   /* No payment made */
+                        {% elif payment_details.fee_status == 'Pending' %}
+                            lightyellow; /* Payment pending */
+                        {% elif payment_details.fee_status == 'Paid' %}
+                            lightgreen;  /* Fully paid */
+                        {% endif %}">
+                        <td><a href="{% url 'fee-history' student.get_id %}">{{ student.get_name }}</a></td>
+                        <td>${{ student.fee }}</td>
+                        <td>${{ payment_details.amount_received }}</td>
+                        <td>${{ payment_details.remaining_fee }}</td>
+                        <td>{{ payment_details.date_received|default:"NA" }}</td>
+                        <td>{{ payment_details.collected_by.get_name|default:"NA" }}</td>
+                        <td>{{ payment_details.fee_status }}</td>
                     </tr>
+                    {% endfor %}
+                    {% comment %} </tr>
                     {% endfor %}
                     {% else %}
                     <tr>
@@ -126,7 +127,7 @@
                             <p style="font-weight: bold; color: black;">No data found.</p>
                         </td>
                     </tr>
-                {% endif %}
+                {% endif %} {% endcomment %}
                 </tbody>
             </table>
             <script>

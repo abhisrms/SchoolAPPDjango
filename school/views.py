@@ -480,7 +480,7 @@ def admin_view_attendance_view(request,cl):
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
 def admin_fee_view(request):
-    return render(request,'school/admin_fee.html')
+    return render(request,'school/admin_fees.html')
 
 
 @login_required(login_url='adminlogin')
@@ -531,6 +531,10 @@ def teacher_dashboard_view(request):
     }
     return render(request,'school/teacher_dashboard.html',context=mydict)
 
+@login_required(login_url='teacherlogin')
+@user_passes_test(is_teacher)
+def teacher_fee_view(request):
+    return render(request,'school/teacher_fees.html')
 
 
 @login_required(login_url='teacherlogin')
@@ -695,6 +699,7 @@ def update_fee_view(request):
 
     return render(request, 'school/admin_update_class_fee.html', {'forms': forms})
 
+
 def get_students_by_class(request):
     cl = request.GET.get('cl', None)
     students = []
@@ -834,6 +839,11 @@ def class_fee_report(request):
     # Query the class fee report for the selected month and year
     classes = Fee.objects.all()
     class_reports = []
+    total_total_students = 0
+    total_total_fee = 0
+    total_total_fee_paid = 0
+    total_remaining_fee = 0
+
     for cl in classes:
         total_students = StudentExtra.objects.filter(cl=cl.cl).count()
         total_fee_per_student = cl.amount
@@ -841,9 +851,21 @@ def class_fee_report(request):
         total_fee_paid = Payment.objects.filter(student__cl=cl.cl, date_received__range=[first_day_of_month, last_day_of_month]).aggregate(total=Sum('amount_received'))['total']
         total_fee_paid = total_fee_paid if total_fee_paid is not None else 0
         remaining_fee = total_fee - total_fee_paid
+        
         class_reports.append({'class': cl.cl, 'total_students': total_students, 'total_fee_per_student': total_fee_per_student, 'total_fee': total_fee, 'total_fee_paid': total_fee_paid, 'remaining_fee': remaining_fee})
+        
+        total_total_students += total_students
+        total_total_fee += total_fee
+        total_total_fee_paid += total_fee_paid
+        total_remaining_fee += remaining_fee
     
-    return render(request, 'school/class_fee_report.html', {'class_reports': class_reports})
+    return render(request, 'school/class_fee_report.html', {
+        'class_reports': class_reports,
+        'total_total_students': total_total_students,
+        'total_total_fee': total_total_fee,
+        'total_total_fee_paid': total_total_fee_paid,
+        'total_remaining_fee': total_remaining_fee
+    })
 
 
 def class_fee_history_view(request, class_id):
@@ -862,17 +884,50 @@ def class_fee_history_view(request, class_id):
     # Get the last day of the selected month
     last_day_of_month = (first_day_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
 
-    # Fetch students belonging to the class
+    # Fetch all students belonging to the class
     students = StudentExtra.objects.filter(cl=class_id)
 
-    # Fetch payments for all students in the class within the current month
-    payments = Payment.objects.filter(student__in=students, date_received__range=[first_day_of_month, last_day_of_month])
+    # Initialize a dictionary to store payment details for each student
+    student_payments = {}
+
+
+    # Iterate over each student
+    for student in students:
+        # Fetch payments for the student within the current month
+        payments = Payment.objects.filter(student=student, date_received__range=[first_day_of_month, last_day_of_month])
+
+        # If the student has no payments, set default payment details
+        if not payments:
+            student_payments[student] = {
+                'amount_received': 0,
+                'remaining_fee': student.fee,
+                'date_received': None,
+                'collected_by': None,
+                'fee_status' : 'None'
+            }
+        else:
+            # Calculate total amount received and remaining fee
+            total_amount_received = sum(payment.amount_received for payment in payments)
+            remaining_fee = student.fee - total_amount_received
+            if remaining_fee == 0:
+                fee_status  = 'Paid'
+            else:
+                fee_status = 'Pending'
+
+            # Store payment details for the student
+            student_payments[student] = {
+                'amount_received': total_amount_received,
+                'remaining_fee': remaining_fee,
+                'date_received': payments.latest('date_received').date_received,
+                'collected_by': payments.latest('date_received').collected_by,
+                'fee_status' : fee_status
+            }
+
 
     context = {
         'class_id': class_id,
-        'students': students,
-        'payments': payments,
-    }
+        'student_payments': student_payments, 
+      }
 
     return render(request, 'school/admin_class_fee_history.html', context)
 

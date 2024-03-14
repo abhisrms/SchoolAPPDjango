@@ -28,7 +28,7 @@ SECRET_KEY = 'k0ujs9pcw+7qohwas!o7_ept20$c@$)-b=qco8sgviy_f)((bc'
 DEBUG = True
 
 # ALLOWED_HOSTS = ['thirdone.eba-2dz4fmhd.us-west-2.elasticbeanstalk.com','127.0.0.1']
-ALLOWED_HOSTS= []
+ALLOWED_HOSTS= [ ]
 
 # Application definition
 
