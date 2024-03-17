@@ -10,12 +10,12 @@ from django.contrib.auth.views import LogoutView
 from .models import Fee,StudentExtra,Payment
 from django.http import JsonResponse
 from .forms import FeeUpdateForm  ,PaymentForm ,BulkStudentUploadForm
-from school.models import Fee , Payment ,StudentExtra ,User
+from school.models import Fee , Payment ,StudentExtra ,User,StudentExportResource
 from django.contrib import messages
 from datetime import datetime, timedelta
 import pandas as pd
 import io
-
+from tablib import Dataset
 import logging
 
 from django.db.models import Count
@@ -1019,3 +1019,14 @@ def bulk_student_upload(request):
     else:
         form = BulkStudentUploadForm()
     return render(request, 'school/admin_bulk_student_upload.html', {'form': form})
+
+
+
+def export_students_to_excel(request):
+    dataset = Dataset()
+    queryset = StudentExtra.objects.all()
+    resource = StudentExportResource()
+    dataset = resource.export(queryset)
+    response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="students.xls"'
+    return response

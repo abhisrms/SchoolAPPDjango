@@ -4,4 +4,7 @@
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 *.pyc
+*.br
+*.gz
+*.js
 F:\SchoolManagement\schoolmanagement\__pycache__

@@ -1,8 +1,3 @@
-"""
-by sumit kumar
-written by fb.com/sumit.luv
-
-"""
 from django.contrib import admin
 from django.urls import path
 from school import views
@@ -93,4 +88,5 @@ urlpatterns = [
     path('contactus', views.contactus_view),
     path('download-excel-template/', download_excel_template, name='download_excel_template'),
     path('admin-bulk-student-upload/', bulk_student_upload, name='admin-bulk-student-upload'),
+    path('export-students/', export_students_to_excel, name='export-students')
 ]
